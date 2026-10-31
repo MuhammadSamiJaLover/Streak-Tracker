@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duolingo-Style Streak Tracker</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #f97316;
+      --accent-glow: rgba(249, 115, 22, 0.4);
+      --text: #f8fafc;
+      --subtext: #94a3b8;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px 12px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    /* Streak Flame Display */
+    .streak-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px 20px;
+      text-align: center;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flame-container {
+      font-size: 80px;
+      margin: 10px 0;
+      display: inline-block;
+      animation: pulseFlame 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px var(--accent-glow));
+    }
+
+    @keyframes pulseFlame {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .streak-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .streak-label {
+      font-size: 0.9rem;
+      color: var(--subtext);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .action-btn {
+      margin-top: 20px;
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: all 0.2s;
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .action-btn.checked-in {
+      background: var(--success);
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+    }
+
+    /* Setup Section */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--subtext);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+
+    .type-toggle {
+      display: flex;
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .type-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: transparent;
+      color: var(--subtext);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .type-btn.active {
+      background: var(--card-bg);
+      color: var(--text);
+    }
+
+    /* Simulated iOS Widget Preview */
+    .widget-preview-box {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 2px dashed var(--border);
+      border-radius: 24px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .widget-tag {
+      font-size: 0.75rem;
+      color: var(--subtext);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .ios-widget-small {
+      width: 140px;
+      height: 140px;
+      background: #1e293b;
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .widget-flame {
+      font-size: 42px;
+      line-height: 1;
+    }
+
+    .widget-day-badge {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: var(--accent);
+      margin-top: 6px;
+    }
+
+    /* History Grid */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .day-dot {
+      aspect-ratio: 1;
+      background: #0f172a;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--subtext);
+      font-weight: 600;
+    }
+
+    .day-dot.active {
+      background: var(--accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="header">
+      <h1>Streak Tracker</h1>
+    </div>
+
+    <!-- Main Dynamic Flame Card -->
+    <div class="streak-card">
+      <div class="flame-container" id="flameIcon">🔥</div>
+      <div class="streak-number" id="streakDisplay">1</div>
+      <div class="streak-label" id="habitTitleDisplay">DAY STREAK</div>
+
+      <button class="action-btn" id="checkInBtn" onclick="toggleCheckIn()">
+        CHECK IN FOR TODAY
+      </button>
+    </div>
+
+    <!-- Simulated iPhone Widget Preview -->
+    <div class="section-card">
+      <div class="section-title">iPhone Home Screen Widget Preview</div>
+      <div class="widget-preview-box">
+        <span class="widget-tag">Small Widget</span>
+        <div class="ios-widget-small">
+          <div class="widget-flame">🔥</div>
+          <div class="widget-day-badge" id="widgetBadge">DAY 1</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Setup -->
+    <div class="section-card">
+      <div class="section-title">Habit Settings</div>
+      <div class="input-group">
+        <input type="text" id="habitInput" value="Daily Goal" placeholder="Enter activity name..." />
+      </div>
+      <div class="type-toggle">
+        <button class="type-btn active" id="btnDo" onclick="setMode('do')">Activity to Do</button>
+        <button class="type-btn" id="btnQuit" onclick="setMode('quit')">Activity to Quit</button>
+      </div>
+    </div>
+
+    <!-- History Dots -->
+    <div class="section-card">
+      <div class="section-title">This Week's Progress</div>
+      <div class="calendar-grid" id="weekGrid">
+        <div class="day-dot">M</div>
+        <div class="day-dot">T</div>
+        <div class="day-dot">W</div>
+        <div class="day-dot">T</div>
+        <div class="day-dot">F</div>
+        <div class="day-dot">S</div>
+        <div class="day-dot">S</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let streakCount = 1;
+    let checkedInToday = false;
+    let habitMode = 'do';
+
+    function toggleCheckIn() {
+      const btn = document.getElementById('checkInBtn');
+      const streakDisplay = document.getElementById('streakDisplay');
+      const widgetBadge = document.getElementById('widgetBadge');
+
+      if (!checkedInToday) {
+        checkedInToday = true;
+        btn.textContent = 'CHECKED IN TODAY ✓';
+        btn.classList.add('checked-in');
+        streakCount++;
+      } else {
+        checkedInToday = false;
+        btn.textContent = 'CHECK IN FOR TODAY';
+        btn.classList.remove('checked-in');
+        streakCount--;
+      }
+
+      streakDisplay.textContent = streakCount;
+      widgetBadge.textContent = 'DAY ' + streakCount;
+    }
+
+    function setMode(mode) {
+      habitMode = mode;
+      document.getElementById('btnDo').classList.toggle('active', mode === 'do');
+      document.getElementById('btnQuit').classList.toggle('active', mode === 'quit');
+    }
+
+    document.getElementById('habitInput').addEventListener('input', (e) => {
+      const title = e.target.value || 'Daily Goal';
+      document.getElementById('habitTitleDisplay').textContent = title.toUpperCase() + ' STREAK';
+    });
+  </script>
+</body>
+</html>
